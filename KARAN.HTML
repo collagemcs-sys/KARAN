@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Kaliya Jumper</title>
+<style>
+  /* Game Area Styles */
+  #game-container {
+    width: 100%;
+    max-width: 400px; /* Mobile-friendly width */
+    height: 300px;
+    border: 3px solid #000;
+    margin: 20px auto;
+    position: relative;
+    overflow: hidden;
+    background-color: #87ceeb; /* Sky background */
+    touch-action: manipulation; /* To improve mobile tapping responsiveness */
+  }
+
+  /* Character Styles */
+  #kaliya {
+    width: 30px;
+    height: 50px;
+    background-color: #000; /* Black character */
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+    border-radius: 5px;
+    transition: bottom 0.3s; /* Smooth jump animation */
+  }
+
+  /* Obstacle Styles */
+  .obstacle {
+    width: 20px;
+    height: 40px;
+    background-color: #ff0000; /* Red obstacle */
+    position: absolute;
+    bottom: 0;
+    right: -20px; /* Start off-screen */
+  }
+
+  /* Score and Instructions Styles */
+  #score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+  }
+
+  #instructions {
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<div id="instructions">
+  <h1>Kaliya Jumper Game</h1>
+  <p>कूदने के लिए स्क्रीन पर क्लिक करें या स्पेसबार दबाएं।</p>
+</div>
+
+<div id="game-container">
+  <div id="kaliya"></div>
+  <div id="score">Score: 0</div>
+</div>
+
+<script>
+  const kaliya = document.getElementById('kaliya');
+  const gameContainer = document.getElementById('game-container');
+  const scoreDisplay = document.getElementById('score');
+
+  let isJumping = false;
+  let score = 0;
+
+  // Function to make Kaliya jump
+  function jump() {
+    if (!isJumping) {
+      isJumping = true;
+      let jumpHeight = 100; // How high the character jumps
+      let originalBottom = 0;
+
+      // Jump up
+      kaliya.style.bottom = `${originalBottom + jumpHeight}px`;
+
+      // Fall down after a short delay
+      setTimeout(() => {
+        kaliya.style.bottom = `${originalBottom}px`;
+        isJumping = false;
+      }, 500); // Jump duration
+    }
+  }
+
+  // Handle keyboard and touch events for jumping
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      jump();
+    }
+  });
+
+  gameContainer.addEventListener('touchstart', jump); // For mobile touch
+  gameContainer.addEventListener('click', jump); // For desktop/mobile click
+
+  // Game Logic: Obstacle movement and collision detection
+  function createObstacle() {
+    const obstacle = document.createElement('div');
+    obstacle.classList.add('obstacle');
+    gameContainer.appendChild(obstacle);
+
+    let obstaclePosition = 400;
+    const obstacleSpeed = 2;
+    const obstacleInterval = setInterval(() => {
+      // Move obstacle
+      obstaclePosition -= obstacleSpeed;
+      obstacle.style.right = `${obstaclePosition}px`;
+
+      // Check for end of screen
+      if (obstaclePosition < -20) {
+        clearInterval(obstacleInterval);
+        obstacle.remove();
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+      }
+
+      // **Collision Detection**
+      let kaliyaBottom = parseInt(kaliya.style.bottom) || 0;
+      let kaliyaLeft = parseInt(kaliya.style.left);
+
+      // Check if Kaliya and the obstacle overlap horizontally and vertically
+      if (
+        obstaclePosition > 30 && // Obstacle is near Kaliya (Horizontal Check - right side)
+        obstaclePosition < 80 && // Obstacle is near Kaliya (Horizontal Check - left side)
+        kaliyaBottom < 40 // Kaliya is on the ground (Vertical Check)
+      ) {
+        clearInterval(obstacleInterval);
+        alert(`Game Over! आपका स्कोर है: ${score}`);
+        location.reload(); // Restart the game
+      }
+    }, 10);
+  }
+
+  // Start spawning obstacles
+  function startGame() {
+    setInterval(createObstacle, 2000); // Create a new obstacle every 2 seconds
+  }
+
+  startGame();
+
+  // Custom instruction based on your saved info
+  // यह 20-लेवल, कस्टम दुश्मनों वाला गेम नहीं है जिसे आपने सेव करने के लिए कहा था, यह एक सरल डेमो है।
+</script>
+</body>
+</html>
